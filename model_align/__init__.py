@@ -1,9 +1,26 @@
+# Copyright (c) 2021 PaddlePaddle Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from __future__ import annotations
+
+from .ReprodLogger import ReprodLogger
+from .ReprodDiffHelper import ReprodDiffHelper
+from . import utils, compare
 import paddle
 import paddle.nn as pn
 import paddle.nn.functional as pF
 import torch.nn.functional as tF
-from .util import save_align_log, show_net_info
+from .util import save_align_log, show_net_info, extract_grad
 import torch
 import torch.nn as tn
 from .util import get_layers
@@ -11,6 +28,7 @@ from typing import Optional, Tuple
 import numpy as np
 import os
 import types
+import copy
 from .torch2paddle import convert_weight
 
 
@@ -84,8 +102,6 @@ class ModelAlign:
                  ):
         os.makedirs(os.path.join(save_path, 'data'), exist_ok=True)
         os.makedirs(os.path.join(save_path, 'align_info'), exist_ok=True)
-        paddle_model.eval()
-        torch_model.eval()
         self.iters = iters
         self.feat_align = feat_align
         self.paddle_loss_func = paddle_loss_func
@@ -142,10 +158,10 @@ class ModelAlign:
         return paddle_output, torch_output
 
     def _hook_paddle(self, net, inputs, output):
-        self.paddle_feats.append(output.detach().numpy())
+        self.paddle_feats.append(copy.deepcopy(output.detach().numpy()))
 
     def _hook_torch(self, net, inputs, output):
-        self.torch_feats.append(output.detach().cpu().numpy())
+        self.torch_feats.append(copy.deepcopy(output.detach().cpu().numpy()))
 
     def _hooks(self):
         for layer in self.layers:
@@ -208,7 +224,7 @@ class ModelAlign:
         loss_paddle = []
         loss_torch = []
         for iter_id in range(1, self.iters + 1):
-            paddle_out, torch_out = self.forward(log_stage=f"backward_iter_{iter_id}")
+            paddle_out, torch_out = self.forward(log_stage=f"forward_iter_{iter_id}", log=True)
             paddle_loss, torch_loss = self.calculate_loss(paddle_out, torch_out, paddle_input=paddle_input, torch_input=torch_input)
             loss_log.append(f"backward_loss_iter_{iter_id}")
             loss_paddle.append(paddle_loss.detach().cpu().numpy())
@@ -218,6 +234,9 @@ class ModelAlign:
             self.torch_opt.zero_grad()
             paddle_loss.backward()
             torch_loss.backward()
+            names, p_feat, t_feat = extract_grad(self.paddle_model, self.torch_model, self.include_buffer_layer)
+            save_align_log(names, p_feat, t_feat, self.save_path, stage=f"backward_iter_{iter_id}")
+
             self.paddle_opt.step()
             self.torch_opt.step()
 

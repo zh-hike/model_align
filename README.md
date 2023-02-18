@@ -21,6 +21,8 @@ pip3 install dist/model_align-1.0.1-py3-none-any.whl --force-reinstall
 
 使用需要保证padle的模型和torch的模型结构完全一致且内部的网络名称命名一样
 
+具体参数说明见 [!pip uninstall model_ailgn这](./docs/Introduction.md)!。
+
 使用resnet18的分类任务举例
 
 ```

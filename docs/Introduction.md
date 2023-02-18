@@ -11,5 +11,5 @@
 * iters (int): 反向时迭代的iter数。默认为 5。
 * feat_align (bool): 是否需要进行网络的中间层对齐检查。如果在使用此框架之前已经将模型参数从torch转到paddle，那么此参数可以设置为False。当此参数为True时，则需要保证paddle模型和torch模型的网络层子模块的命名一致。默认为 True。
 
-> 使用方法请参考范例运行的脚本 `./demos/run.sh`。
+> 使用方法请参考范例运行的脚本 [这里](../demos/run.sh)。
 >

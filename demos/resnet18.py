@@ -1,3 +1,7 @@
+import os
+import sys
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../')))
 import paddle
 import torch
 import paddle.nn as pn
@@ -22,7 +26,7 @@ align = ModelAlign(paddle_model,
                    paddle_loss_func=paddle_loss,
                    torch_loss_func=torch_loss, 
                    input_data=input_data,
-                   diff_threshold=100,
+                   diff_threshold=1e-6,
                    save_path="./output/resnet18",
                    iters=3,
                    feat_align=True)
