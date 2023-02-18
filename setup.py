@@ -19,11 +19,11 @@ with open('requirements.txt', encoding="utf-8-sig") as f:
 
 setup(
     name='model_align',
-    version='1.0.1',
+    version='1.0',
     install_requires=requirements,
     license='Apache License 2.0',
     keywords='model_align',
-    description="TBD",
+    description="torch2paddle",
     url='https://github.com/zh-hike/model_align',
     author='zh-hike',
     author_email='1583124882@qq.com',

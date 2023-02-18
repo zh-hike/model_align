@@ -20,20 +20,20 @@ class ModelAlign:
     内部的layer命名一致，如果不一致，则需要在使用前手动进行torch参数转换到paddle
     模型中，并且将 feat_align设置成False。
     Args:
-        paddle_model (paddle.nn.Linear): 需要转换的paddle模型
-        torch_model (torch.nn.Module): 需要转换的torch模型
-        input_data (torch.Tensor | paddle.Tensor | np.ndarray): 两个模型的输入数据
-        paddle_loss_func (function): 计算paddle的损失函数
-        torch_loss_func (function): 计算torch的损失函数
-        save_path (Optional[str]): 对齐日志需要保存的路径，默认为./output
-        learning_rate (Optional[float]): 学习率，默认是 1e-3
-        diff_threshold (Optional[float]): 对齐的误差阈值，默认是 1e-6
-        iters (int): 反向对齐时的迭代次数
-        feat_align (bool): 是否进行模型的中间层特征对齐，如果两个模型的子层命名不一致，则需要在使用前先进行权重转换，然后这个参数设置成 False，默认为 True。
-
+        * paddle_model (paddle.nn.Layer): paddle的模型
+        * torch_model (torch.nn.Module): torch的模型
+        * input_data (torch.Tensor | paddle.Tensor | np.ndarray): 模型前向输入的数据
+        * paddle_loss_func (Option[function | paddle.nn.Layer]): paddle的损失函数。反向对齐时需要提供。默认为None。
+        * torch_loss_func (Option[function | torch.nn.Module]): torch的损失函数。反向对齐时需要提供。默认为None。
+        * save_path (str): 对齐日志保存的路径，默认为 `./output`。
+        * learning_rate (float): 学习率，默认为 `1e-3`。
+        * diff_threshold (float): 对齐时判断的阈值。默认为 `1e-6`。
+        * iters (int): 反向时迭代的iter数。默认为 5。
+        * feat_align (bool): 是否需要进行网络的中间层对齐检查。如果在使用此框架之前已经将模型参数从torch转到paddle，那么此参数可以设置为False。当此参数为True时，则需要保证paddle模型和torch模型的网络层子模块的命名一致。默认为 True。
+            
     Examples: 
         code-block: python
-
+        
         import paddle
         import torch
         import paddle.nn as pn
@@ -54,16 +54,19 @@ class ModelAlign:
         torch_model = torch_resnet18()
         input_data = torch.randn((2,3,224,224))
         align = ModelAlign(paddle_model, 
-                            torch_model,
-                            paddle_loss_func=paddle_loss,
-                            torch_loss_func=torch_loss, 
-                            input_data=input_data,
-                            diff_threshold=1e-6,
-                            iters=2)      # 反向时迭代次数
-        align.forward()        # 前向对齐
+                        torch_model,
+                        paddle_loss_func=paddle_loss,
+                        torch_loss_func=torch_loss, 
+                        input_data=input_data,
+                        diff_threshold=100,
+                        save_path="./output/resnet18",
+                        iters=3,
+                        feat_align=True)
+        align.convert_weight()
+        align.forward()
         torch_input = torch.randint(0, 100, (2,))
         paddle_input = paddle.to_tensor(torch_input.numpy())
-        align.backward(paddle_input={'label':paddle_input},       # 反向对齐
+        align.backward(paddle_input={'label':paddle_input}, 
                         torch_input={'label':torch_input})
     """
     def __init__(self,
