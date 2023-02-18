@@ -23,7 +23,9 @@ align = ModelAlign(paddle_model,
                     torch_loss_func=torch_loss, 
                     input_data=input_data,
                     diff_threshold=100,
-                    iters=2)
+                    iters=2,
+                    feat_align=True)
+align.convert_weight()
 align.forward()
 torch_input = torch.randint(0, 100, (2,))
 paddle_input = paddle.to_tensor(torch_input.numpy())

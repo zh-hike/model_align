@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 from typing import Optional
 import numpy as np
@@ -28,9 +29,9 @@ def check_diff(paddle_npy: str,
     checker.report(path=os.path.join(save_path, 'align_info', stage+'.txt'),
                    diff_threshold=diff_threshold)
 
-def save_align_log(names: Optional[str | list], 
-                   paddle_feat: Optional[np.ndarray | list], 
-                   torch_feat: Optional[np.ndarray | list],
+def save_align_log(names: str | list, 
+                   paddle_feat: np.ndarray | list, 
+                   torch_feat: np.ndarray | list,
                    save_path: str,
                    stage: str,
                    diff_threshold: float = 1e-6) -> None:

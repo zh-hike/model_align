@@ -14,3 +14,6 @@ nohup.out
 .DS_Store
 .idea
 output/
+build/
+dist/
+*egg-info/

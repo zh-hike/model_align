@@ -24,7 +24,8 @@ setup(
     license='Apache License 2.0',
     keywords='model_align',
     description="TBD",
-    url='https://github.com/WenmuZhou/reprod_log',
+    url='https://github.com/zh-hike/model_align',
     author='zh-hike',
     author_email='1583124882@qq.com',
-    packages=find_packages(), )
+    packages=find_packages(), 
+    )
