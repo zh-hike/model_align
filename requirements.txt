@@ -1,4 +1,4 @@
-numpy==1.23.5
+# numpy==1.23.5
 # paddle==1.0.2
 # paddlepaddle_gpu==2.4.1.post112
 reprod_log==1.0.1

@@ -3,7 +3,7 @@ import paddle
 import paddle.nn as pn
 import paddle.nn.functional as pF
 import torch.nn.functional as tF
-from .util import save_align_log
+from .util import save_align_log, show_net_info
 import torch
 import torch.nn as tn
 from .util import get_layers
@@ -77,6 +77,7 @@ class ModelAlign:
                  diff_threshold: float = 1e-6,
                  iters: int = 5,
                  feat_align: bool = True,
+                 show_net: bool = True,
                  ):
         os.makedirs(os.path.join(save_path, 'data'), exist_ok=True)
         os.makedirs(os.path.join(save_path, 'align_info'), exist_ok=True)
@@ -99,8 +100,10 @@ class ModelAlign:
 
         self._set_optimizer()
         self._set_data()
+        if show_net:
+            show_net_info(self.paddle_model, self.torch_model, self.save_path)
         if self.feat_align:
-            self.layers = get_layers(self.paddle_model, self.torch_model)
+            self.include_buffer_layer, self.layers = get_layers(self.paddle_model, self.torch_model)
             self._hooks()
 
     def calculate_loss(self, 
@@ -164,9 +167,38 @@ class ModelAlign:
 
     def convert_weight(self):
         assert self.feat_align, f"if you want to convert_weight, the feat_align should be set True."
-        convert_weight(self.paddle_model, self.torch_model, self.layers)
+        convert_weight(self.paddle_model, self.torch_model, self.include_buffer_layer)
 
-    def backward(self, **kwargs):
+    def backward(self, 
+                 paddle_input: dict = None,
+                 torch_input: dict = None):
+        """
+        you need provide the loss_func param
+        Args:
+            paddle_input (dict): paddle_loss func's param
+            torch_input (dict): torch_loss func's param
+
+        Examples:
+
+            paddle_model = paddle_resnet18()
+            torch_model = torch_resnet18()
+            input_data = torch.randn((2,3,224,224))
+            align = ModelAlign(paddle_model, 
+                                torch_model,
+                                paddle_loss_func=paddle_loss,
+                                torch_loss_func=torch_loss, 
+                                input_data=input_data,
+                                diff_threshold=1e-6,
+                                iters=2)      # 反向时迭代次数
+
+            def paddle_loss(paddle_out, label=None):
+                return pn.CrossEntropyLoss()(paddle_out, label)
+            
+            def torch_loss(torch_out, label=None):
+                return tn.CrossEntropyLoss()(torch_out, label)
+
+            
+        """
         assert self.paddle_loss_func, f"if you want to backward align, the paddle_loss_func should not be None"
         assert self.torch_loss_func, f"if you want to backward align, the torch_loss_func should not be None"
         loss_log = []
@@ -174,10 +206,18 @@ class ModelAlign:
         loss_torch = []
         for iter_id in range(1, self.iters + 1):
             paddle_out, torch_out = self.forward(log_stage=f"backward_iter_{iter_id}")
-            paddle_loss, torch_loss = self.calculate_loss(paddle_out, torch_out, **kwargs)
+            paddle_loss, torch_loss = self.calculate_loss(paddle_out, torch_out, paddle_input=paddle_input, torch_input=torch_input)
             loss_log.append(f"backward_loss_iter_{iter_id}")
             loss_paddle.append(paddle_loss.detach().cpu().numpy())
             loss_torch.append(torch_loss.detach().cpu().numpy())
+
+            self.paddle_opt.clear_grad()
+            self.torch_opt.zero_grad()
+            paddle_loss.backward()
+            torch_loss.backward()
+            self.paddle_opt.step()
+            self.torch_opt.step()
+
         save_align_log(loss_log, loss_paddle, loss_torch, self.save_path, "backward_loss")
 
     def _set_optimizer(self):

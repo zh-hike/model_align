@@ -18,13 +18,14 @@ paddle_model = paddle_resnet18()
 torch_model = torch_resnet18()
 input_data = torch.randn((2,3,224,224))
 align = ModelAlign(paddle_model, 
-                    torch_model,
-                    paddle_loss_func=paddle_loss,
-                    torch_loss_func=torch_loss, 
-                    input_data=input_data,
-                    diff_threshold=100,
-                    iters=2,
-                    feat_align=True)
+                   torch_model,
+                   paddle_loss_func=paddle_loss,
+                   torch_loss_func=torch_loss, 
+                   input_data=input_data,
+                   diff_threshold=100,
+                   save_path="./output/resnet18",
+                   iters=3,
+                   feat_align=True)
 align.convert_weight()
 align.forward()
 torch_input = torch.randint(0, 100, (2,))

@@ -14,7 +14,7 @@ def convert_key_to_layer_name(key: str) -> str:
         age = match.group()
         return '['+age.strip('.')+'].'
     
-    layer_name = re.sub('(\\.[0-9]\\.+)', convert, key+'.').strip('.')
+    layer_name = re.sub('(\\.[0-9]+\\.)', convert, key+'.').strip('.')
     return layer_name
 
 def check_diff(paddle_npy: str,
@@ -65,12 +65,31 @@ def save_align_log(names: str | list,
     
 
 def get_layers(paddle_model: pn.Layer, torch_model: tn.Module):
-        paddle_layer_name = {}.fromkeys([k[:k.rindex('.')] for k in paddle_model.state_dict().keys()]).keys()
-        torch_layer_name = {}.fromkeys([k[:k.rindex('.')] for k in torch_model.state_dict().keys()]).keys()
+    paddle_layer_name = {}.fromkeys([k[:k.rindex('.')] if '.' in k else k for k in paddle_model.state_dict().keys()]).keys()
+    torch_layer_name = {}.fromkeys([k[:k.rindex('.')] if '.' in k else k for k in torch_model.state_dict().keys()]).keys()
 
-        paddle_layer_name = [convert_key_to_layer_name(k) for k in paddle_layer_name]
-        torch_layer_name = [convert_key_to_layer_name(k) for k in torch_layer_name]
-        assert len(paddle_layer_name) == len(torch_layer_name), "the number of paddle_model'layer is not equal torch_model'layer"
-        for p_name, t_name in zip(paddle_layer_name, torch_layer_name):
-            assert p_name == t_name, f"paddle_model's layer name {p_name} is must equal torch_model's layer name {t_name}"
-        return paddle_layer_name
+    paddle_layer_name = [convert_key_to_layer_name(k) for k in paddle_layer_name]
+    torch_layer_name = [convert_key_to_layer_name(k) for k in torch_layer_name]   # 包含cls_token
+    new_paddle_layer_name = []   # 不包含cls_token
+    new_torch_layer_name = []
+    for p_layer, t_layer in zip(paddle_layer_name, torch_layer_name):
+        if isinstance(eval(f"paddle_model.{p_layer}"), pn.Layer):
+            new_paddle_layer_name.append(p_layer)
+            new_torch_layer_name.append(t_layer)
+
+    assert len(paddle_layer_name) == len(torch_layer_name), "the number of paddle_model'layer is not equal torch_model'layer"
+    for p_name in paddle_layer_name:
+        assert p_name in torch_layer_name, f"paddle_model's layer {p_name} is not in torch_model"
+    
+    for t_name in torch_layer_name:
+        assert t_name in paddle_layer_name, f"torch_model's layer {t_name} is not in paddle_model"
+    
+    return paddle_layer_name, new_paddle_layer_name
+
+
+def show_net_info(paddle_model: pn.Layer, torch_model: tn.Module, save_path: str):
+    with open(os.path.join(save_path, 'align_info', 'paddle_net.txt'), 'w') as f:
+        f.write(str(paddle_model))
+
+    with open(os.path.join(save_path, 'align_info', 'torch_net.txt'), 'w') as f:
+        f.write(str(torch_model))

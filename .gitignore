@@ -17,3 +17,5 @@ output/
 build/
 dist/
 *egg-info/
+/paddle_log
+/torch_log
