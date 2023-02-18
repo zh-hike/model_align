@@ -14,7 +14,7 @@ pip3 install dist/model_align-1.0.1-py3-none-any.whl --force-reinstall
 2. pip安装
 
 ```
-
+pip install model_align -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ## 使用方法

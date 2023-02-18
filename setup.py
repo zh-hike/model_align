@@ -19,7 +19,7 @@ with open('requirements.txt', encoding="utf-8-sig") as f:
 
 setup(
     name='model_align',
-    version='1.0',
+    version='1.1',
     install_requires=requirements,
     license='Apache License 2.0',
     keywords='model_align',
