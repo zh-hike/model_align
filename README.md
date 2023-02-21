@@ -21,7 +21,7 @@ pip install model_align -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 使用需要保证padle的模型和torch的模型结构完全一致且内部的网络名称命名一样
 
-具体参数说明见 [!pip uninstall model_ailgn这](./docs/Introduction.md)!。
+具体参数说明见 [这里](./docs/Introduction.md)。
 
 使用resnet18的分类任务举例
 
@@ -54,12 +54,13 @@ align = ModelAlign(paddle_model,
                    save_path="./output/resnet18",
                    iters=3,
                    feat_align=True)
-align.convert_weight()
-align.forward()
-torch_input = torch.randint(0, 100, (2,))
-paddle_input = paddle.to_tensor(torch_input.numpy())
+align.plot_weight()                   # 可视化权重，此操作会占用较长时间
+align.convert_weight()                # 权重转化
+align.forward()                       # 前向对齐
+torch_input = torch.randint(0, 100, (2,))               # 设置torch_loss中的输入
+paddle_input = paddle.to_tensor(torch_input.numpy())    # 设置paddle_loss中的输入
 align.backward(paddle_input={'label':paddle_input}, 
-                torch_input={'label':torch_input})
+                torch_input={'label':torch_input})    # 反向对齐
 ```
 
 模型结果默认输出到 `./output中`。

@@ -315,7 +315,7 @@ def reset_initialized_parameter(model, include_self=True):
 
         elif isinstance(m, nn.Linear):
             # k = math.sqrt(1. / m.weight.shape[0])
-            kaiming_uniform_(m.weight, a=np.sqrt(5))
+            kaiming_uniform_(m.weight, a=np.sqrt(5), reverse=True)
             if hasattr(m, 'bias') and getattr(m, 'bias') is not None:
                 fan_in, _ = _calculate_fan_in_and_fan_out(m.weight, reverse=True)
                 bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
