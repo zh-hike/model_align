@@ -16,7 +16,7 @@ import sys
 
 import numpy as np
 
-from .utils import init_logger, check_print_diff
+from .utils.utils import init_logger, check_print_diff
 from .compare import compute_diff, check_data
 
 

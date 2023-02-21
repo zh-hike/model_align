@@ -15,7 +15,7 @@
 import paddle
 import numpy as np
 
-from .utils import np2torch, np2paddle, paddle2np, torch2np, check_print_diff
+from .utils.utils import np2torch, np2paddle, paddle2np, torch2np, check_print_diff
 
 
 def check_data(data1: dict, data2: dict):

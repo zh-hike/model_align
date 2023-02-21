@@ -13,17 +13,18 @@
 # limitations under the License.
 from __future__ import annotations
 
-from .ReprodLogger import ReprodLogger
+from .ReprodLogger  import ReprodLogger
 from .ReprodDiffHelper import ReprodDiffHelper
-from . import utils, compare
+from .utils import utils
+from . import compare
 import paddle
 import paddle.nn as pn
 import paddle.nn.functional as pF
 import torch.nn.functional as tF
-from .util import save_align_log, show_net_info, extract_grad
+from .utils.util import save_align_log, show_net_info, extract_grad
 import torch
 import torch.nn as tn
-from .util import get_layers
+from .utils.util import get_layers
 from typing import Optional, Tuple
 import numpy as np
 import os

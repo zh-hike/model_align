@@ -3,9 +3,18 @@ import re
 from typing import Optional
 import numpy as np
 import os
-from . import ReprodLogger, ReprodDiffHelper
+from model_align.ReprodDiffHelper import ReprodDiffHelper
+from model_align.ReprodLogger import ReprodLogger
 import paddle.nn as pn
 import torch.nn as tn
+
+__all__ = ['convert_key_to_layer_name',
+           'check_diff',
+           'save_align_log',
+           'get_layers',
+           'show_net_info',
+           'extract_grad',
+           ]
 
 
 def convert_key_to_layer_name(key: str) -> str:
