@@ -22,7 +22,7 @@ inputs_data = torch.randn((3, 3, 224, 224))
 
 from model_align import ModelAlign
 align = ModelAlign(paddle_model, torch_modle, input_data=inputs_data, paddle_loss_func=paddle_loss, torch_loss_func=torch_loss)
-
-align.convert_weight()
-align.forward()
-align.backward(paddle_input={}, torch_input={})
+align.plot_weight()
+# align.convert_weight()
+# align.forward()
+# align.backward(paddle_input={}, torch_input={})

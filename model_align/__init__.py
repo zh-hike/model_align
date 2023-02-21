@@ -30,6 +30,7 @@ import numpy as np
 import os
 import types
 import copy
+from .utils.visiual import plot_weight_distributed
 from .torch2paddle import convert_weight
 
 
@@ -140,6 +141,9 @@ class ModelAlign:
             assert isinstance(torch_loss, torch.Tensor), f"torch func shoudle be return type torch.Tensor, not be type {type(torch_loss)}"
             
             return paddle_loss, torch_loss 
+
+    def plot_weight(self):
+        plot_weight_distributed(self.paddle_model, self.torch_model, self.layers, self.save_path)
 
     def forward(self,
                 log: bool = True,

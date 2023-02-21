@@ -214,11 +214,11 @@ class VisionTransformer(nn.Layer):
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
-        if isinstance(m, Linear):
+        if isinstance(m, (Linear, nn.Linear)):
             trunc_normal_(m.weight)
-            if isinstance(m, Linear) and m.bias is not None:
+            if isinstance(m, (Linear, nn.Linear)) and m.bias is not None:
                 zeros_(m.bias)
-        elif isinstance(m, LayerNorm):
+        elif isinstance(m, (LayerNorm, nn.LayerNorm)):
             zeros_(m.bias)
             ones_(m.weight)
 
