@@ -189,8 +189,8 @@ class ModelAlign:
         convert_weight(self.paddle_model, self.torch_model, self.include_buffer_layer)
 
     def backward(self, 
-                 paddle_input: dict = None,
-                 torch_input: dict = None):
+                 paddle_input: dict = {},
+                 torch_input: dict = {}):
         """
         you need provide the loss_func param
         Args:
